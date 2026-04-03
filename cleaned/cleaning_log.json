@@ -1,0 +1,160 @@
+{
+  "created": "2026-04-03T10:52:30.482924",
+  "total_files": 7,
+  "entries": [
+    {
+      "source": "rtsp_recordings\\audio_20260403_103319.wav",
+      "output": "cleaned\\audio_20260403_103319_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.6671001952640344,
+        "peak": 1.0,
+        "snr_estimate_db": 3.516178644538494,
+        "dynamic_range_db": 3.516178644538494
+      },
+      "analysis_after": {
+        "rms": 0.15,
+        "peak": 0.3027278427875773,
+        "snr_estimate_db": 6.099222142076062,
+        "dynamic_range_db": 6.099222142076062
+      },
+      "timestamp": "2026-04-03T10:52:29.875444"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103350_part001.wav",
+      "output": "cleaned\\audio_20260403_103350_part001_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.5412025477584809,
+        "peak": 1.0,
+        "snr_estimate_db": 5.33280335180444,
+        "dynamic_range_db": 5.33280335180444
+      },
+      "analysis_after": {
+        "rms": 0.15,
+        "peak": 0.34922207318697257,
+        "snr_estimate_db": 7.340208543631224,
+        "dynamic_range_db": 7.340208543631224
+      },
+      "timestamp": "2026-04-03T10:52:29.973166"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103420_part002.wav",
+      "output": "cleaned\\audio_20260403_103420_part002_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.5060409756536168,
+        "peak": 1.0,
+        "snr_estimate_db": 5.916286312225312,
+        "dynamic_range_db": 5.916286312225312
+      },
+      "analysis_after": {
+        "rms": 0.15000000000000002,
+        "peak": 0.4350740958754252,
+        "snr_estimate_db": 9.249439346001786,
+        "dynamic_range_db": 9.249439346001786
+      },
+      "timestamp": "2026-04-03T10:52:30.098832"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103451_part003.wav",
+      "output": "cleaned\\audio_20260403_103451_part003_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.4426679146187824,
+        "peak": 1.0,
+        "snr_estimate_db": 7.078439106797541,
+        "dynamic_range_db": 7.078439106797541
+      },
+      "analysis_after": {
+        "rms": 0.15000000000000002,
+        "peak": 0.44171661738986095,
+        "snr_estimate_db": 9.381049573579652,
+        "dynamic_range_db": 9.381049573579652
+      },
+      "timestamp": "2026-04-03T10:52:30.204547"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103521_part004.wav",
+      "output": "cleaned\\audio_20260403_103521_part004_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.4125194275175012,
+        "peak": 1.0,
+        "snr_estimate_db": 7.691111872464437,
+        "dynamic_range_db": 7.691111872464437
+      },
+      "analysis_after": {
+        "rms": 0.15000000000000002,
+        "peak": 0.4814254038821693,
+        "snr_estimate_db": 10.128754887261575,
+        "dynamic_range_db": 10.128754887261575
+      },
+      "timestamp": "2026-04-03T10:52:30.307374"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103552_part005.wav",
+      "output": "cleaned\\audio_20260403_103552_part005_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.4543816523852915,
+        "peak": 1.0,
+        "snr_estimate_db": 6.851584269034871,
+        "dynamic_range_db": 6.851584269034871
+      },
+      "analysis_after": {
+        "rms": 0.14999999999999997,
+        "peak": 0.39289363314011955,
+        "snr_estimate_db": 8.363674641011162,
+        "dynamic_range_db": 8.363674641011162
+      },
+      "timestamp": "2026-04-03T10:52:30.418078"
+    },
+    {
+      "source": "rtsp_recordings\\audio_20260403_103623_part006.wav",
+      "output": "cleaned\\audio_20260403_103623_part006_cleaned.wav",
+      "preset": "music",
+      "transforms": [
+        "bandpass_20-15000Hz",
+        "normalize_rms_0.15"
+      ],
+      "analysis_before": {
+        "rms": 0.4670548055663184,
+        "peak": 1.0,
+        "snr_estimate_db": 6.612643101376192,
+        "dynamic_range_db": 6.612643101376192
+      },
+      "analysis_after": {
+        "rms": 0.15,
+        "peak": 0.43144464146991995,
+        "snr_estimate_db": 9.176676407559668,
+        "dynamic_range_db": 9.176676407559668
+      },
+      "timestamp": "2026-04-03T10:52:30.480910"
+    }
+  ]
+}
