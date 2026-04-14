@@ -106,44 +106,133 @@ class AudioCleaner:
 
     # ==================== Шумоподавление ====================
 
-    def spectral_subtraction(self, audio, sample_rate, noise_duration=0.5):
+    def spectral_subtraction(self, audio, sample_rate, noise_frames=5, alpha=7.0, beta=0.002, gamma=0.9, n_thres=1.1,
+                               use_improved=True, spectral_floor=0.02):
         """
         Подавление шума методом спектрального вычитания
+
+        Алгоритм:
+        1. Разбиение на фреймы с 50% перекрытием (окно Хэмминга)
+        2. Оценка шума из первых noise_frames фреймов
+        3. Спектральное вычитание с адаптивным обновлением шума
+        4. Оверлэп-эдд (перекрытие с суммированием)
 
         Args:
             audio: аудиоданные
             sample_rate: частота дискретизации
-            noise_duration: длительность шума в начале (сек)
+            noise_frames: количество первых фреймов для оценки шума (по умолчанию 5)
+            alpha: коэффициент спектрального вычитания (по умолчанию 5.01)
+            beta: коэффициент спектрального порога шума (по умолчанию 0.002)
+            gamma: коэффициент обновления оценки шума (по умолчанию 0.9)
+            n_thres: порог ОСШ для детектора речи (по умолчанию 1.1)
+            use_improved: использовать улучшенную версию (меньше артефактов)
+            spectral_floor: спектральный пол (0.01-0.05) для подавления музыкального шума
         """
-        # Параметры STFT
-        n_fft = 2048
-        hop_length = n_fft // 4
+        # === Инициализация переменных ===
+        frame_duration = 0.02  # Размер фрейма 0.02 с = 20 мс
+        Ln = int(np.floor(frame_duration * sample_rate))  # Размер фрейма в отсчетах
+        if Ln % 2 == 1:  # Размер должен быть четным
+            Ln += 1
 
-        # Оценка шума из первого сегмента
-        noise_samples = int(noise_duration * sample_rate)
-        noise_segment = audio[:min(noise_samples, len(audio))]
+        # Перекрытие между фреймами (50%)
+        perc = 50
+        len1 = int(np.floor(Ln * perc / 100))
+        len2 = Ln - len1
 
-        # STFT
-        from scipy.signal import stft, istft
-        f, t, Zxx = stft(audio, fs=sample_rate, nperseg=n_fft, noverlap=hop_length)
-        _, _, Zxx_noise = stft(noise_segment, fs=sample_rate, nperseg=n_fft, noverlap=hop_length)
+        # Окно Хэмминга
+        win = np.hamming(Ln)
 
-        # Оценка мощности шума
-        noise_power = np.mean(np.abs(Zxx_noise) ** 2, axis=1, keepdims=True)
+        # Нормирующий коэффициент для перекрытия с суммированием
+        win_gain = len2 / np.sum(win)
 
-        # Спектральное вычитание
-        signal_power = np.abs(Zxx) ** 2
-        clean_power = np.maximum(signal_power - 2 * noise_power, 0)
-        clean_mag = np.sqrt(clean_power)
+        # Длина БПФ (следующая степень двойки)
+        n_fft = 2 * (2 ** int(np.ceil(np.log2(Ln))))
 
-        # Восстановление фазы
-        phase = np.angle(Zxx)
-        Zxx_clean = clean_mag * np.exp(1j * phase)
+        # === Оценка спектра шума из первых noise_frames фреймов ===
+        noise_mean = np.zeros(n_fft)
+        n = 0
+        for frame_ind in range(noise_frames):
+            if n + Ln > len(audio):
+                break
+            frame = win * audio[n:n + Ln]
+            noise_mean += np.abs(np.fft.fft(frame, n_fft))
+            n += Ln
 
-        # Обратное STFT
-        _, clean_audio = istft(Zxx_clean, fs=sample_rate, nperseg=n_fft, noverlap=hop_length)
+        P_d = noise_mean / noise_frames  # Усреднение
+        P_d = P_d ** 2  # Спектр мощности
 
-        return clean_audio[:len(audio)]
+        # === Выделение памяти ===
+        n = 0
+        x_old = np.zeros(len1)
+        Nframes = int(np.floor(len(audio) / len2)) - 1
+        s_hat = np.zeros(Nframes * len2)
+
+        # === Начало обработки ===
+        for frame_ind in range(Nframes):
+            if n + Ln > len(audio):
+                break
+
+            # Применение оконной функции и БПФ
+            input_frame = win * audio[n:n + Ln]
+            spec = np.fft.fft(input_frame, n_fft)
+            P_x = np.abs(spec) ** 2  # Спектр мощности
+            theta = np.angle(spec)  # Фаза
+
+            # Сегментное отношение сигнал/шум
+            if np.sum(P_d) > 0:
+                SNRseg = 10 * np.log10(np.sum(P_x) / np.sum(P_d))
+            else:
+                SNRseg = 999  # Если шум нулевой
+
+            # === Спектральное вычитание ===
+            if use_improved:
+                # УЛУЧШЕННАЯ ВЕРСИЯ (меньше артефактов):
+                # Мягкий порог с плавным переходом
+                spectral_floor_db = 10 ** (spectral_floor * 10)  # Пол в dB
+                
+                # Отношение сигнал/шум для каждой частоты
+                snr_local = P_x / (P_d + 1e-10)
+                
+                # Плавный весовой коэффициент (sigmoid)
+                gain = np.maximum(snr_local - alpha, spectral_floor) / (snr_local + 1e-10)
+                gain = np.clip(gain, spectral_floor, 1.0)
+                
+                # Применяем усиление
+                sub_speech = P_x * gain
+                
+            else:
+                # ОРИГИНАЛЬНЫЙ MATLAB МЕТОД (может давать артефакты):
+                sub_speech = P_x - alpha * P_d
+                diffw = sub_speech - beta * P_d
+
+                # Ограничиваем отрицательные компоненты
+                neg_mask = diffw < 0
+                sub_speech[neg_mask] = beta * P_d[neg_mask]
+
+            # === Детектор речевой активности ===
+            if SNRseg < n_thres:
+                # Обновить оценку спектра шума
+                noise_temp = gamma * P_d + (1 - gamma) * P_x
+                P_d = noise_temp
+
+            # Доопределение симметричной части спектра
+            # Копируем первую половину (без DC и Nyquist) во вторую половину с переворотом
+            sub_speech[n_fft // 2 + 2:n_fft] = sub_speech[2:n_fft // 2][::-1]
+
+            # Восстановление комплексного спектра
+            x_phase = np.sqrt(sub_speech) * (np.cos(theta) + 1j * np.sin(theta))
+
+            # Обратное БПФ
+            xi = np.real(np.fft.ifft(x_phase))
+
+            # === Перекрытие с суммированием ===
+            s_hat[n:n + len2] = x_old + xi[:len1]
+            x_old = xi[len1:Ln]
+
+            n += len2
+
+        # === Нормализация и возврат ===
+        return (win_gain * s_hat)[:len(audio)]
 
     def wiener_filter(self, audio, sample_rate, noise_duration=0.5):
         """
@@ -359,6 +448,14 @@ class AudioCleaner:
             result = self.normalize_lufs_like(result, sample_rate, -19)
             applied.append('normalize_lufs_-19')
 
+        elif preset == 'spectral_sub':
+            # Спектральное вычитание (улучшенная версия без артефактов)
+            result = self.spectral_subtraction(result, sample_rate, use_improved=True, spectral_floor=0.02)
+            applied.append('spectral_subtraction_improved')
+
+            result = self.normalize_lufs_like(result, sample_rate, -19)
+            applied.append('normalize_lufs_-19')
+
         elif preset == 'custom':
             # Только нормализация
             result = self.normalize_peak(result, 0.9)
@@ -487,7 +584,7 @@ if __name__ == "__main__":
     parser.add_argument("--input", "-i", default="rtsp_recordings", help="Папка с исходниками")
     parser.add_argument("--output", "-o", default="cleaned_audio", help="Папка для результатов")
     parser.add_argument("--preset", "-p", default="voice",
-                        choices=['voice', 'engine', 'music', 'outdoor', 'aggressive', 'custom'],
+                        choices=['voice', 'engine', 'music', 'outdoor', 'aggressive', 'spectral_sub', 'custom'],
                         help="Пресет обработки")
     parser.add_argument("--pattern", default="*.wav", help="Шаблон файлов")
     parser.add_argument("--distance", "-d", type=float, default=None,

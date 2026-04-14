@@ -6,7 +6,8 @@
       "Bash(py *)",
       "Bash(.\\venv\\scripts\\pip *)",
       "Bash(g:\\progect\\saund-analizer\\venv\\scripts\\python.exe *)",
-      "Bash(powershell *)"
+      "Bash(powershell *)",
+      "WebSearch"
     ]
   },
   "$version": 3
