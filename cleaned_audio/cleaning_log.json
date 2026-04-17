@@ -1,0 +1,77 @@
+{
+  "created": "2026-04-16T10:18:17.972282",
+  "total_files": 3,
+  "entries": [
+    {
+      "source": "D:\\Dataset\\CAM_92_51_12_11_8554\\Интересное\\БПЛА_вроде.wav",
+      "output": "cleaned_audio\\БПЛА_вроде_cleaned.wav",
+      "preset": "spectral_sub",
+      "distance_meters": null,
+      "transforms": [
+        "spectral_subtraction_improved",
+        "normalize_lufs_-19",
+        "clipping_protection"
+      ],
+      "analysis_before": {
+        "rms": 0.13416555701189792,
+        "peak": 0.86639404296875,
+        "snr_estimate_db": 16.20148839048586,
+        "dynamic_range_db": 16.20148839048586
+      },
+      "analysis_after": {
+        "rms": 0.029005008820881154,
+        "peak": 0.95,
+        "snr_estimate_db": 30.305012068188052,
+        "dynamic_range_db": 30.305012068188052
+      },
+      "timestamp": "2026-04-16T10:18:13.445385"
+    },
+    {
+      "source": "D:\\Dataset\\CAM_92_51_12_11_8554\\Интересное\\воздушка.wav",
+      "output": "cleaned_audio\\воздушка_cleaned.wav",
+      "preset": "spectral_sub",
+      "distance_meters": null,
+      "transforms": [
+        "spectral_subtraction_improved",
+        "normalize_lufs_-19"
+      ],
+      "analysis_before": {
+        "rms": 0.2992662813554121,
+        "peak": 1.0,
+        "snr_estimate_db": 10.47884425632802,
+        "dynamic_range_db": 10.47884425632802
+      },
+      "analysis_after": {
+        "rms": 0.11223851476428297,
+        "peak": 0.8093482269511039,
+        "snr_estimate_db": 17.15987017072421,
+        "dynamic_range_db": 17.15987017072421
+      },
+      "timestamp": "2026-04-16T10:18:15.672430"
+    },
+    {
+      "source": "D:\\Dataset\\CAM_92_51_12_11_8554\\Интересное\\Стрельба.wav",
+      "output": "cleaned_audio\\Стрельба_cleaned.wav",
+      "preset": "spectral_sub",
+      "distance_meters": null,
+      "transforms": [
+        "spectral_subtraction_improved",
+        "normalize_lufs_-19",
+        "clipping_protection"
+      ],
+      "analysis_before": {
+        "rms": 0.2847190182058202,
+        "peak": 1.0,
+        "snr_estimate_db": 10.911670451512268,
+        "dynamic_range_db": 10.911670451512268
+      },
+      "analysis_after": {
+        "rms": 0.10425343659889007,
+        "peak": 0.95,
+        "snr_estimate_db": 19.19266450742509,
+        "dynamic_range_db": 19.19266450742509
+      },
+      "timestamp": "2026-04-16T10:18:17.968292"
+    }
+  ]
+}
