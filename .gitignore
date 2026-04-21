@@ -43,3 +43,6 @@ Thumbs.db
 *.png
 *.jpg
 *.log
+
+# Модел
+*.pkl

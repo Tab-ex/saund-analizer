@@ -253,10 +253,19 @@ class MopedMLDetector:
             return False
 
         with open(self.model_path, 'rb') as f:
-            self.model = pickle.load(f)
+            model_data = pickle.load(f)
+
+        # Модель может быть сохранена как dict или как прямой объект
+        if isinstance(model_data, dict):
+            self.model = model_data['model']
+            print(f"✅ Модель загружена: {self.model_path}")
+            print(f"   Точность: {model_data.get('metadata', {}).get('accuracy', 'N/A')}")
+        else:
+            self.model = model_data
+            print(f"✅ Модель загружена: {self.model_path}")
 
         self.is_loaded = True
-        print(f"✅ Модель загружена: {self.model_path}")
+
         return True
 
     def predict(self, features):
