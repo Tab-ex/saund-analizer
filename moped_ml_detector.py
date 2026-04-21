@@ -254,38 +254,18 @@ class MopedMLDetector:
 
         with open(self.model_path, 'rb') as f:
             model_data = pickle.load(f)
-        
+
         # Модель может быть сохранена как dict или как прямой объект
         if isinstance(model_data, dict):
-            # Пробуем разные варианты ключей для извлечения модели
-            if 'model' in model_data:
-                self.model = model_data['model']
-            elif 'classifier' in model_data:
-                self.model = model_data['classifier']
-            elif 'rf' in model_data:
-                self.model = model_data['rf']
-            else:
-                # Если ключи неизвестны, выводим доступные ключи для отладки
-                print(f"⚠ Неизвестная структура модели. Доступные ключи: {list(model_data.keys())}")
-                # Пытаемся найти первый объект с методом predict
-                for key, value in model_data.items():
-                    if hasattr(value, 'predict'):
-                        self.model = value
-                        print(f"   Найдена модель в ключе: {key}")
-                        break
-                else:
-                    print("❌ Не удалось найти объект модели в словаре")
-                    return False
-            
+            self.model = model_data['model']
             print(f"✅ Модель загружена: {self.model_path}")
-            metadata = model_data.get('metadata', {})
-            if metadata:
-                print(f"   Точность: {metadata.get('accuracy', 'N/A')}")
+            print(f"   Точность: {model_data.get('metadata', {}).get('accuracy', 'N/A')}")
         else:
             self.model = model_data
             print(f"✅ Модель загружена: {self.model_path}")
 
         self.is_loaded = True
+
         return True
 
     def predict(self, features):
