@@ -372,6 +372,7 @@ class MopedMLDetector:
             print(f"\n✅ ОБНАРУЖЕНО: Двигатель мопеда найден!")
             print(f"   Количество сегментов: {moped_count}")
             print(f"   Примерная длительность: {moped_count * self.feature_extractor.window_size:.1f} сек")
+            print(f"   Процент нахождения: {percent} %")
         else:
             print(f"\n❌ НЕ ОБНАРУЖЕНО: Звуков мопеда нет.")
 
