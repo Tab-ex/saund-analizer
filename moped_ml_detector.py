@@ -253,10 +253,39 @@ class MopedMLDetector:
             return False
 
         with open(self.model_path, 'rb') as f:
-            self.model = pickle.load(f)
+            model_data = pickle.load(f)
+        
+        # Модель может быть сохранена как dict или как прямой объект
+        if isinstance(model_data, dict):
+            # Пробуем разные варианты ключей для извлечения модели
+            if 'model' in model_data:
+                self.model = model_data['model']
+            elif 'classifier' in model_data:
+                self.model = model_data['classifier']
+            elif 'rf' in model_data:
+                self.model = model_data['rf']
+            else:
+                # Если ключи неизвестны, выводим доступные ключи для отладки
+                print(f"⚠ Неизвестная структура модели. Доступные ключи: {list(model_data.keys())}")
+                # Пытаемся найти первый объект с методом predict
+                for key, value in model_data.items():
+                    if hasattr(value, 'predict'):
+                        self.model = value
+                        print(f"   Найдена модель в ключе: {key}")
+                        break
+                else:
+                    print("❌ Не удалось найти объект модели в словаре")
+                    return False
+            
+            print(f"✅ Модель загружена: {self.model_path}")
+            metadata = model_data.get('metadata', {})
+            if metadata:
+                print(f"   Точность: {metadata.get('accuracy', 'N/A')}")
+        else:
+            self.model = model_data
+            print(f"✅ Модель загружена: {self.model_path}")
 
         self.is_loaded = True
-        print(f"✅ Модель загружена: {self.model_path}")
         return True
 
     def predict(self, features):
@@ -356,15 +385,21 @@ class MopedMLDetector:
         total = len(results)
         percent = moped_count / total * 100 if total > 0 else 0
 
-        print(f"\n📈 ИТОГО:")
-        print(f"   Обнаружен двигатель: {moped_count}/{total} окон ({percent:.1f}%)")
-        print(f"   Длительность: {moped_count * self.feature_extractor.window_size:.1f} сек")
+        # Определяем факт обнаружения (если найдено хотя бы одно окно)
+        detected = moped_count > 0
+        
+        if detected:
+            print(f"\n✅ ОБНАРУЖЕНО: Двигатель мопеда найден!")
+            print(f"   Количество сегментов: {moped_count}")
+            print(f"   Примерная длительность: {moped_count * self.feature_extractor.window_size:.1f} сек")
+        else:
+            print(f"\n❌ НЕ ОБНАРУЖЕНО: Звуков мопеда нет.")
 
         return {
             'file': str(file_path),
-            'total_windows': total,
+            'detected': detected,
             'moped_windows': moped_count,
-            'percent': percent,
+            'total_windows': total,
             'results': results
         }
 
@@ -385,18 +420,28 @@ class MopedMLDetector:
         print("=" * 70)
 
         all_results = []
+        detected_files = []
         total_moped_time = 0
 
         for file_path in audio_files:
             result = self.analyze_file(file_path)
             if result:
                 all_results.append(result)
+                if result['detected']:
+                    detected_files.append(result['file'])
                 total_moped_time += result['moped_windows'] * self.feature_extractor.window_size
 
         print("\n" + "=" * 70)
         print(f"📊 ИТОГО:")
         print(f"   Файлов: {len(all_results)}")
         print(f"   Общее время работы двигателя: {total_moped_time:.1f} сек")
+        
+        if detected_files:
+            print(f"\n✅ ФАЙЛЫ С ОБНАРУЖЕНИЕМ ({len(detected_files)}):")
+            for f in detected_files:
+                print(f"   - {Path(f).name}")
+        else:
+            print(f"\n❌ В файлах ничего не обнаружено.")
 
         return all_results
 
