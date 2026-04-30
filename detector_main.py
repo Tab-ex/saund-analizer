@@ -12,7 +12,7 @@ from sender_json import send_to_server
 from moped_ml_detector import MopedFeatureExtractor, MopedMLDetector
 
 # === НАСТРОЙКИ ===
-MODEL_PATH = "moped_model.pkl"
+MODEL_PATH = "my_model_1.pkl"
 SERVER_URL = "http://192.168.1.100:5000/api/detect"  # <-- ЗАМЕНИТЕ НА ВАШ ENDPOINT
 CONFIDENCE_THRESHOLD = 0.75
 LOOP_DELAY = 1  # Пауза между циклами (сек)
