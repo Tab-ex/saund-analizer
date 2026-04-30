@@ -268,33 +268,41 @@ class MopedMLDetector:
 
         return True
 
-    def predict(self, features):
+    def predict(self, features, threshold=0.9):
         """
         Предсказание для одного набора признаков
-
+        
+        Args:
+            features: dict с признаками
+            threshold: порог уверенности для класса "moped" (по умолчанию 0.5)
+            
         Returns:
-            (is_moped, confidence)
+            (is_moped: bool, confidence: float)
         """
         if not self.is_loaded:
             print("❌ Модель не загружена!")
             return False, 0.0
 
-        # Преобразование в вектор признаков
+        # 1. Вектор признаков
         feature_vector = [features[name] for name in self.FEATURE_NAMES]
         X = np.array([feature_vector])
 
-        # Предсказание
-        prediction = self.model.predict(X)[0]
+        # 2. Вероятности классов [prob_class_0, prob_class_1]
         probabilities = self.model.predict_proba(X)[0]
-
-        # Вероятность класса "moped"
+        
+        # 3. Безопасное получение вероятности класса "1" (moped)
         if hasattr(self.model, 'classes_'):
-            moped_idx = list(self.model.classes_).index(1) if 1 in self.model.classes_ else 0
-            confidence = probabilities[moped_idx]
+            classes = list(self.model.classes_)
+            moped_idx = classes.index(1) if 1 in classes else 1  # fallback
         else:
-            confidence = probabilities[1]
-
-        return bool(prediction), confidence
+            moped_idx = 1  # для большинства бинарных моделей
+            
+        confidence = probabilities[moped_idx]
+        
+        # 4. Применяем ВАШ порог
+        is_moped = confidence >= threshold
+        
+        return is_moped, confidence
 
     def predict_chunk(self, audio_chunk):
         """
